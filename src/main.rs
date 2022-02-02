@@ -19,8 +19,9 @@ async fn main() {
         .and(warp::query::<SearchQuery>())
         .and_then(search_route);
 
+    println!("Running on 0.0.0.0:3030");
     warp::serve(api.or(assets).or(index))
-        .run(([127, 0, 0, 1], 3030))
+        .run(([0, 0, 0, 0], 3030))
         .await;
 }
 

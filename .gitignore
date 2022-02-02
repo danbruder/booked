@@ -1,4 +1,5 @@
 .DS_Store
+.elm-spa
 assets/.elm-spa
 assets/elm-stuff
 assets/node_modules

@@ -70,10 +70,6 @@ update msg model =
                     ( { model | results = items }, Effect.none )
 
                 Err err ->
-                    let
-                        _ =
-                            Debug.log "error" err
-                    in
                     ( model, Effect.none )
 
 
