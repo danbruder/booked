@@ -15,7 +15,6 @@ import Svg.Styled as Svg exposing (svg)
 import Svg.Styled.Attributes as SvgAttr
 import Tailwind.Breakpoints as Bp
 import Tailwind.Utilities as Tw exposing (..)
-import UI
 import View exposing (View)
 
 
@@ -90,20 +89,23 @@ view : Model -> View Msg
 view model =
     { title = "Search Amazon"
     , body =
-        [ UI.layout <|
-            div
-                [ css
-                    [ max_w_3xl
-                    , m_auto
-                    , py_12
-                    ]
-                ]
-                [ h1 [ css [ text_2xl, mb_4 ] ] [ text "Search Amazon" ]
+        [ HS.toUnstyled <|
+            div [ Attr.css [ Tw.bg_gray_50 ] ]
+                [ Css.Global.global Tw.globalStyles
                 , div
-                    [ css [ pb_8 ] ]
-                    [ viewInput model ]
-                , div []
-                    [ viewItems model.results
+                    [ css
+                        [ max_w_3xl
+                        , m_auto
+                        , py_12
+                        ]
+                    ]
+                    [ h1 [ css [ text_2xl, mb_4 ] ] [ text "Search Amazon" ]
+                    , div
+                        [ css [ pb_8 ] ]
+                        [ viewInput model ]
+                    , div []
+                        [ viewItems model.results
+                        ]
                     ]
                 ]
         ]
