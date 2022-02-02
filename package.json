@@ -1,0 +1,10 @@
+{
+  "name": "booked",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Dan Bruder <danb@structionsite.com>",
+  "license": "MIT",
+  "dependencies": {
+    "elm-spa": "^6.0.4"
+  }
+}
