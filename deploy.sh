@@ -3,6 +3,9 @@
 set -e
 
 echo "Building..."
+cd assets && elm make .elm-spa/defaults/Main.elm --output=public/dist/elm.js
+cd ..
+
 docker build -t danbruder/booked:latest .
 
 echo "Pushing..."

@@ -178,7 +178,7 @@ getSearchResult query =
                 (JD.field "image_url" JD.string)
     in
     Http.get
-        { url = "http://localhost:3030/api/search?s=" ++ query
+        { url = "/api/search?s=" ++ query
         , expect = Http.expectJson GotSearchResults (JD.list decoder)
         }
 

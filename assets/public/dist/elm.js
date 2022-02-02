@@ -6877,7 +6877,7 @@ var $author$project$Pages$Home_$getSearchResult = function (query) {
 				$elm$http$Http$expectJson,
 				$author$project$Pages$Home_$GotSearchResults,
 				$elm$json$Json$Decode$list(decoder)),
-			url: 'http://localhost:3030/api/search?s=' + query
+			url: '/api/search?s=' + query
 		});
 };
 var $elm$core$Debug$log = _Debug_log;
