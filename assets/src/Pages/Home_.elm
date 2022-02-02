@@ -1,12 +1,19 @@
 module Pages.Home_ exposing (Model, Msg, page)
 
+import Css
 import Effect exposing (Effect)
 import Gen.Params.Home_ exposing (Params)
 import Html.Styled as Html exposing (..)
 import Html.Styled.Attributes as Attr exposing (..)
+import Html.Styled.Events as HE
+import Http
+import Json.Decode as JD
 import Page
 import Request
 import Shared
+import Svg.Styled as Svg exposing (svg)
+import Svg.Styled.Attributes as SvgAttr
+import Tailwind.Breakpoints as Bp
 import Tailwind.Utilities as Tw exposing (..)
 import UI
 import View exposing (View)
@@ -27,12 +34,12 @@ page shared req =
 
 
 type alias Model =
-    {}
+    { search : String, results : List Item }
 
 
 init : ( Model, Effect Msg )
 init =
-    ( {}, Effect.none )
+    ( { search = "", results = [] }, Effect.none )
 
 
 
@@ -40,14 +47,34 @@ init =
 
 
 type Msg
-    = ReplaceMe
+    = TypedInSearch String
+    | SubmittedForm
+    | GotSearchResults (Result Http.Error (List Item))
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
 update msg model =
     case msg of
-        ReplaceMe ->
-            ( model, Effect.none )
+        TypedInSearch str ->
+            ( { model | search = str }, Effect.none )
+
+        SubmittedForm ->
+            ( model
+            , getSearchResult model.search
+                |> Effect.fromCmd
+            )
+
+        GotSearchResults results ->
+            case results of
+                Ok items ->
+                    ( { model | results = items }, Effect.none )
+
+                Err err ->
+                    let
+                        _ =
+                            Debug.log "error" err
+                    in
+                    ( model, Effect.none )
 
 
 
@@ -65,83 +92,158 @@ subscriptions model =
 
 view : Model -> View Msg
 view model =
-    { title = "hey"
+    { title = "Search Amazon"
     , body =
-        [ UI.layout <| viewBooks (List.reverse books)
+        [ UI.layout <|
+            div
+                [ css
+                    [ max_w_3xl
+                    , m_auto
+                    , py_12
+                    ]
+                ]
+                [ h1 [ css [ text_2xl, mb_4 ] ] [ text "Search Amazon" ]
+                , div
+                    [ css [ pb_8 ] ]
+                    [ viewInput model ]
+                , div []
+                    [ viewItems model.results
+                    ]
+                ]
         ]
     }
 
 
-books =
-    [ Book "Parenting" "Paul Tripp" "parenting.webp"
-    , Book "Finding the Right Hills to Die On: The Case for Theological Triage" "Gavin Ortlund" "finding.webp"
-    , Book "Daring Greatly" "Brene Brown" "daring.webp"
-    , Book "On Birth" "Tim Keller" "onbirth.jpeg"
-    , Book "On Marriage " "Tim Keller" "onmarriage.jpeg"
-    , Book "On Death " "Tim Keller" "ondeath.jpeg"
-    , Book "The One Thing " "Gary Keller" "onething.jpg"
-    , Book "Future Men: Raising Boys to Fight Giants " "Douglas Wilson" "futuremen.webp"
-    , Book "The Four Seasons of Marriage " "Douglas Wilson" "fourseasons.webp"
-    , Book "Standing in the Fire " "Tom Doyle" "standing.webp"
-    , Book "Be a Circle Maker" "Mark Batterson" "circle.webp"
-    , Book "Atomic Habits" "James Clear" "atomic.webp"
-    ]
-
-
-type alias Book =
+type alias Item =
     { title : String
-    , author : String
     , url : String
+    , imageUrl : String
     }
 
 
-viewBooks : List Book -> Html Msg
-viewBooks b =
+viewItems : List Item -> Html Msg
+viewItems b =
     b
-        |> List.map viewBook
+        |> List.map viewItem
         |> div
             [ css
                 [ m_auto
                 , w_full
-                , max_w_xl
+                , max_w_3xl
                 ]
             ]
 
 
-viewBook : Book -> Html Msg
-viewBook book =
+viewItem : Item -> Html Msg
+viewItem item =
     div
         [ css
             [ bg_white
             , p_4
+            , mb_4
             , rounded
             , shadow
             , flex
             ]
         ]
         [ div [ css [ w_32, mr_4, flex_shrink_0 ] ]
-            [ viewImg book.url
+            [ viewImg item.imageUrl
             ]
         , div
             []
             [ h2
                 [ css
-                    [ font_bold
-                    , text_xl
+                    []
+                ]
+                [ a [ href item.url ]
+                    [ text item.title
                     ]
                 ]
-                [ text book.title ]
-            , p
-                [ css
-                    [ text_gray_500
-                    , uppercase
-                    ]
-                ]
-                [ text book.author ]
             ]
         ]
 
 
 viewImg : String -> Html Msg
 viewImg url =
-    img [ src ("/img/" ++ url) ] []
+    img [ src url ] []
+
+
+getSearchResult : String -> Cmd Msg
+getSearchResult query =
+    let
+        decoder =
+            JD.map3 Item
+                (JD.field "title" JD.string)
+                (JD.field "url" JD.string)
+                (JD.field "image_url" JD.string)
+    in
+    Http.get
+        { url = "http://localhost:3030/api/search?s=" ++ query
+        , expect = Http.expectJson GotSearchResults (JD.list decoder)
+        }
+
+
+viewInput model =
+    Html.form [ HE.onSubmit SubmittedForm ]
+        [ div
+            []
+            [ div
+                [ css
+                    [ Tw.mt_1
+                    , Tw.relative
+                    , Tw.rounded_md
+                    , Tw.shadow_sm
+                    ]
+                ]
+                [ div
+                    [ css
+                        [ Tw.absolute
+                        , Tw.inset_y_0
+                        , Tw.left_0
+                        , Tw.pl_3
+                        , Tw.flex
+                        , Tw.items_center
+                        , Tw.pointer_events_none
+                        ]
+                    ]
+                    [ svg
+                        [ SvgAttr.css
+                            [ Tw.h_6
+                            , Tw.w_6
+                            ]
+                        , SvgAttr.fill "none"
+                        , SvgAttr.viewBox "0 0 24 24"
+                        , SvgAttr.stroke "currentColor"
+                        ]
+                        [ Svg.path
+                            [ SvgAttr.strokeLinecap "round"
+                            , SvgAttr.strokeLinejoin "round"
+                            , SvgAttr.strokeWidth "2"
+                            , SvgAttr.d "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                            ]
+                            []
+                        ]
+                    ]
+                , input
+                    [ value model.search
+                    , HE.onInput TypedInSearch
+                    , css
+                        [ Tw.block
+                        , Tw.w_full
+                        , Tw.pl_12
+                        , Tw.border_gray_300
+                        , Tw.rounded_md
+                        , Tw.py_4
+                        , Css.focus
+                            [ Tw.ring_indigo_500
+                            , Tw.border_indigo_500
+                            ]
+                        , Bp.sm
+                            []
+                        ]
+                    , Attr.placeholder "Search..."
+                    ]
+                    []
+                ]
+            ]
+        ]

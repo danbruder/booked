@@ -5,7 +5,8 @@
   "author": "Dan Bruder <danb@structionsite.com>",
   "license": "MIT",
   "scripts": { 
-      "start": "elm-spa server"
+      "start": "elm-spa server",
+      "build": "elm-spa build"
   },
   "dependencies": {
     "elm-spa": "^6.0.4"
