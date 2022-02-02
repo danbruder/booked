@@ -4,6 +4,9 @@
   "main": "index.js",
   "author": "Dan Bruder <danb@structionsite.com>",
   "license": "MIT",
+  "scripts": { 
+      "start": "elm-spa server"
+  },
   "dependencies": {
     "elm-spa": "^6.0.4"
   }
