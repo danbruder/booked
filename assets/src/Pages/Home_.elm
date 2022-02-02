@@ -1,6 +1,7 @@
 module Pages.Home_ exposing (Model, Msg, page)
 
 import Css
+import Css.Global
 import Effect exposing (Effect)
 import Gen.Params.Home_ exposing (Params)
 import Html.Styled as Html exposing (..)
@@ -89,7 +90,7 @@ view : Model -> View Msg
 view model =
     { title = "Search Amazon"
     , body =
-        [ HS.toUnstyled <|
+        [ Html.toUnstyled <|
             div [ Attr.css [ Tw.bg_gray_50 ] ]
                 [ Css.Global.global Tw.globalStyles
                 , div
